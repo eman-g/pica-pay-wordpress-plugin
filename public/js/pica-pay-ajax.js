@@ -10,11 +10,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		// Get ppPostId from the button's data attribute and add it to the form data
 		const ppPostId = this.getAttribute('data-pp-post-id');
+		const nonce = this.getAttribute('data-pp-nonce');
 
 		// Ensure the action parameter is correctly specified
 		const formData = new URLSearchParams();
 		formData.append('action', 'create_transaction');
 		formData.append('pp_post_id', ppPostId);
+		formData.append('pp_data_nonce', nonce);
 
 		fetch(picaPayParams.ajaxurl, {
 			method: 'POST',
@@ -36,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					// Open intent URL in new small window
 					window.open(response.data.intentUrl, 'intentWindow', 'width=800,height=800');
 
-					handleArticleFetch(response.data.transactionId);
+					handleArticleFetch(response.data.transactionId, nonce);
 				} else {
 					console.error('Error creating transaction:', response.data);
 				}
@@ -44,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			.catch(error => console.error('Error:', error));
 	});
 
-	function handleArticleFetch(transactionId, attempt = 0) {
+	function handleArticleFetch(transactionId, nonce, attempt = 0) {
 		if (attempt > 60) {
 			alert('Failed to purchase article');
 			return;
@@ -53,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		const formData = new URLSearchParams();
 		formData.append('action', 'poll_transaction_status');
 		formData.append('transactionId', transactionId);
+		formData.append('pp_data_nonce', nonce);
 
 		fetch(picaPayParams.ajaxurl, {
 			method: 'POST',
@@ -77,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					location.reload();
 				} else {
 					setTimeout(function() {
-						handleArticleFetch(transactionId, ++attempt);
+						handleArticleFetch(transactionId, nonce, ++attempt);
 					}, 1000);
 				}
 			})

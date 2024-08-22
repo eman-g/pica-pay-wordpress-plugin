@@ -263,14 +263,18 @@ class Pica_Pay_Admin {
     }
 
     public function bulk_action_admin_notice() {
+        if (!isset($_REQUEST['_wpnonce']) || !wp_verify_nonce($_REQUEST['_wpnonce'], 'bulk-posts')) {
+            return;
+        }
+
         if (!empty($_REQUEST['bulk_add_pica_pay_paid'])) {
             $count = (int)$_REQUEST['bulk_add_pica_pay_paid'];
-            printf('<div id="message" class="updated fade"><p>' . __('Applied Pica-Pay charge to %s posts.', 'pica-pay') . '</p></div>', $count);
+            printf('<div id="message" class="updated fade"><p>' . 'Applied Pica-Pay charge to %s posts.', 'pica-pay' . '</p></div>', $count);
         }
 
         if (!empty($_REQUEST['bulk_remove_pica_pay_paid'])) {
             $count = (int)$_REQUEST['bulk_remove_pica_pay_paid'];
-            printf('<div id="message" class="updated fade"><p>' . __('Removed Pica-Pay charge from %s posts.', 'pica-pay') . '</p></div>', $count);
+            printf('<div id="message" class="updated fade"><p>' . 'Removed Pica-Pay charge from %s posts.', 'pica-pay' . '</p></div>', $count);
         }
     }
 

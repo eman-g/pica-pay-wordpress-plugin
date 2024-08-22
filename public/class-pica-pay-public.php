@@ -128,6 +128,11 @@ class Pica_Pay_Public {
 
     public function handle_create_transaction()
     {
+        if (!isset($_POST['pp_data_nonce']) || !wp_verify_nonce($_POST['pp_data_nonce'], 'pica_pay_purchase_content')) {
+            wp_send_json_error('Invalid nonce');
+            wp_die();
+        }
+
         $pp_post_id = isset($_POST['pp_post_id']) ? sanitize_text_field($_POST['pp_post_id']) : '';
 
         $options = $this->get_options();
@@ -142,7 +147,7 @@ class Pica_Pay_Public {
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer '.$api_key,
             ],
-            'body' => json_encode([
+            'body' => wp_json_encode([
                 'charge' => $charge,
                 'description' => 'Charge for ' . $post->post_title . ' (ID ' . $pp_post_id . ')',
             ]),
@@ -168,6 +173,11 @@ class Pica_Pay_Public {
 
     public function handle_poll_transaction_status()
     {
+        if (!isset($_POST['pp_data_nonce']) || !wp_verify_nonce($_POST['pp_data_nonce'], 'pica_pay_purchase_content')) {
+            wp_send_json_error('Invalid nonce');
+            wp_die();
+        }
+
         $options = $this->get_options();
         $transaction_id = isset($_POST['transactionId']) ? sanitize_text_field($_POST['transactionId']) : '';
         $api_url = $options['api_url'] . '/vendor/transaction/status/' . $transaction_id;
@@ -230,9 +240,11 @@ class Pica_Pay_Public {
 
             $num_preview_words = $options['preview_length'] ?? 100;
 
+            $nonce = wp_create_nonce('pica_pay_purchase_content');
+
             $content = implode(' ', array_slice(explode(' ', $post->post_content), 0, $num_preview_words)) .
-                '...<br><button id="purchase-button" data-pp-post-id=' . get_the_id() . '>Purchase Content</button>
-                <div id="article-content"></div>';
+                '...<br><button id="purchase-button" data-pp-post-id="' . get_the_id() . '" data-pp-nonce="' . $nonce . '">Purchase Content</button>
+            <div id="article-content"></div>';
         }
 
         return $content;
