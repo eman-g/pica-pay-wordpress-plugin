@@ -140,6 +140,8 @@ class Pica_Pay_Public {
         $api_url = $options['api_url'] . '/vendor/transaction/create';
         $api_key = $options['api_key'];
         $charge = get_post_meta($pp_post_id, '_pica_pay_charge', true) ?? $options['default_charge'];
+        $charge = $charge * 10;
+
         $post = get_post($pp_post_id);
 
         $response = wp_remote_post($api_url, [
